@@ -1,0 +1,32 @@
+import pytest
+
+from {{ child_client_import }}.{{ service_module }}.{{ api_module }}_client import {{ api_client_class }}
+{% if models_to_import %}
+from {{ models_import }} import {{ models_to_import | join(', ') }}
+{% endif %}
+
+@pytest.mark.skip
+{% if async_mode %}
+@pytest.mark.asyncio
+async def test_{{ method_name }}({{ client_fixture }}: {{ api_client_class }}):
+{% else %}
+def test_{{ method_name }}({{ client_fixture }}: {{ api_client_class }}):
+{% endif %}
+{% for param in parameters.get('path', []) %}
+    {{ param.python_name }} = ...
+{% endfor %}
+{% for param in parameters.get('query', []) %}
+    {{ param.python_name }} = ...
+{% endfor %}
+{% for param in parameters.get('header', []) %}
+    {{ param.python_name }} = ...
+{% endfor %}
+{% if request_body_var %}
+    {{ request_body_var }}: {{ request_body_model }} = {{ request_body_model }}()
+{% endif %}
+{% if async_mode %}
+    response = await {{ client_fixture }}.{{ method_name }}({{ call_arguments | join(', ') }})
+{% else %}
+    response = {{ client_fixture }}.{{ method_name }}({{ call_arguments | join(', ') }})
+{% endif %}
+    assert response is not None
