@@ -8,7 +8,7 @@ from restcodegen.generator.utils import (
     create_and_write_file,
     name_to_snake,
     snake_to_camel,
-format_file
+    format_file,
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator

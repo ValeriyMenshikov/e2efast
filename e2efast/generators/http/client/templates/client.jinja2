@@ -3,4 +3,8 @@ from {{ base_import }}.{{ service_name|to_snake_case }}.apis.{{ api_name|to_snak
 
 
 class {{ api_name|to_snake_case|to_camel_case }}Client({{ api_name|to_snake_case|to_camel_case }}Api):
-    ...
+    """
+    You can edit this class manually.
+
+    For override methods see {{ api_name|to_snake_case|to_camel_case }}Api.
+    """

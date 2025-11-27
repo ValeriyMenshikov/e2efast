@@ -209,7 +209,9 @@ class ServiceTestGenerator(BaseTemplateGenerator):
 
     def _default_fixtures_import(self) -> str:
         parts = [
-            part for part in (Path("fixtures") / "http").parts if part not in {"", "."}
+            part
+            for part in (Path("framework") / "fixtures" / "http").parts
+            if part not in {"", "."}
         ]
         return ".".join(parts)
 

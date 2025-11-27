@@ -1,4 +1,5 @@
 from pathlib import Path
+from shutil import rmtree
 
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.codegen import RESTClientGenerator
@@ -12,7 +13,7 @@ from restcodegen.generator.utils import (
 
 class ClientGenerator(BaseTemplateGenerator):
     BASE_PATH = Path("") / "internal" / "clients" / "http"
-    CHILD_CLIENTS_PATH = Path("") / "clients" / "http"
+    CHILD_CLIENTS_PATH = Path("") / "framework" / "clients" / "http"
 
     def __init__(
         self,
@@ -29,7 +30,7 @@ class ClientGenerator(BaseTemplateGenerator):
             self.child_base_path = Path(self.CHILD_CLIENTS_PATH)
 
         if base_path is None:
-            base_path = Path(self.BASE_PATH)
+            self.base_path = Path(self.BASE_PATH)
 
         self.openapi_spec = openapi_spec
         self._service_name = name_to_snake(openapi_spec.service_name)
@@ -38,14 +39,28 @@ class ClientGenerator(BaseTemplateGenerator):
             # TODO: сделать прием шаблонов для RESTClientGenerator
             templates_dir=None,
             async_mode=async_mode,
-            base_path=base_path,
+            base_path=self.base_path,
         )
         super().__init__(templates_dir=str(templates_dir))
 
     def generate(self) -> None:
         self.rest_generator.generate()
+        self._cleanup_legacy_clients()
         self._gen_child_clients()
+        self._create_init_files()
         format_file(str(self.child_base_path))
+
+    def _create_init_files(self):
+        create_and_write_file(self.child_base_path / "__init__.py", " ")
+        create_and_write_file(self.child_base_path.parent / "__init__.py", " ")
+        create_and_write_file(self.child_base_path.parent.parent / "__init__.py", " ")
+        create_and_write_file(self.base_path.parent.parent / "__init__.py", " ")
+
+    def _cleanup_legacy_clients(self) -> None:
+        # TODO: это костылина
+        legacy_root = Path("clients")
+        if legacy_root.exists():
+            rmtree(legacy_root)
 
     def _gen_child_clients(self) -> None:
         service_module = name_to_snake(self.openapi_spec.service_name)

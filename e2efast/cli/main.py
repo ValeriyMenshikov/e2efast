@@ -49,7 +49,7 @@ def main(
     ClientGenerator(openapi_spec=parser, async_mode=False).generate()
     if with_suite:
         fixture_generator = FIXTURE_GENERATORS[suite_version]
-        fixture_generator(openapi_spec=parser, async_mode=False).generate()
+        fixture_generator(openapi_spec=parser).generate()
         test_generator = TEST_GENERATORS[suite_version]
         test_generator(openapi_spec=parser, async_mode=False).generate()
 

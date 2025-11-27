@@ -15,7 +15,7 @@ from e2efast.generators.http.client.generator import ClientGenerator
 
 
 class FixtureGenerator(BaseTemplateGenerator):
-    BASE_PATH = Path("") / "fixtures" / "http"
+    BASE_PATH = Path("") / "framework" / "fixtures" / "http"
 
     def __init__(
         self,
@@ -24,7 +24,6 @@ class FixtureGenerator(BaseTemplateGenerator):
         base_path: str | Path | None = None,
         base_client_import: str | None = None,
         child_client_import: str | None = None,
-        async_mode: bool = False,
     ) -> None:
         if templates_dir is None:
             templates_dir = Path(__file__).parent / "templates"
@@ -33,7 +32,6 @@ class FixtureGenerator(BaseTemplateGenerator):
             base_path = Path(self.BASE_PATH)
 
         self.openapi_spec = openapi_spec
-        self.async_mode = async_mode
         self._service_module = name_to_snake(openapi_spec.service_name)
         self.base_path = Path(base_path)
         self.base_client_import = (
@@ -42,13 +40,17 @@ class FixtureGenerator(BaseTemplateGenerator):
         self.child_client_import = (
             child_client_import or self._default_child_client_import()
         )
-        self.models_import = self._build_models_import()
-
         super().__init__(templates_dir=str(templates_dir))
 
     def generate(self) -> None:
         self._gen_fixtures()
+        self._gen_base_fixture()
         format_file(str(self.base_path))
+
+    def _gen_base_fixture(self) -> None:
+        template = self.env.get_template("base.jinja2")
+        rendered = template.render()
+        create_and_write_file(self.base_path / "base.py", rendered)
 
     def _gen_fixtures(self) -> None:
         output_path = self._service_file_path()
@@ -89,15 +91,10 @@ class FixtureGenerator(BaseTemplateGenerator):
             return
 
         rendered_code = template.render(
-            async_mode=self.async_mode,
             child_client_import=self.child_client_import,
             service_module=self._service_module,
             fixtures=fixtures,
-            models_import=self.models_import,
-            models_to_import=sorted(all_models),
             service_fixture_name=f"{self._service_module}_client",
-            http_client_import=self._http_client_import_name(),
-            http_client_class=self._http_client_class_name(),
         )
 
         create_and_write_file(output_path, rendered_code)
@@ -164,10 +161,6 @@ class FixtureGenerator(BaseTemplateGenerator):
             models.update(self._collect_models(context))
         return sorted(models)
 
-    def _build_models_import(self) -> str:
-        return ".".join(
-            [self.base_client_import, self._service_module, "models", "api_models"]
-        )
 
     @staticmethod
     def _default_base_client_import() -> str:
@@ -183,9 +176,3 @@ class FixtureGenerator(BaseTemplateGenerator):
         if base.name == self._service_module and base.suffix == "":
             return base.with_suffix(".py")
         return base / f"{self._service_module}.py"
-
-    def _http_client_class_name(self) -> str:
-        return "AsyncClient" if self.async_mode else "Client"
-
-    def _http_client_import_name(self) -> str:
-        return "AsyncClient" if self.async_mode else "Client"

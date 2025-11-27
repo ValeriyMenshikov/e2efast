@@ -1,0 +1,11 @@
+import httpx
+
+"""
+You can redefine client class for own needs, client should be a subclass of httpx.Client
+
+Example:
+    from httpx import AsyncClient
+    ClientClass = AsyncClient
+"""
+
+ClientClass = httpx.Client
