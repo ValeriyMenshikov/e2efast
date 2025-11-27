@@ -8,6 +8,7 @@ packages = [{ include = "e2efast" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
+restcodegen = {git = "https://github.com/ValeriyMenshikov/restcodegen.git"}
 
 
 [build-system]

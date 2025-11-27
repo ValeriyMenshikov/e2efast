@@ -1,0 +1,6 @@
+from {{ base_import }}.{{ service_name|to_snake_case }}.models import *  # noqa: F401, F403
+from {{ base_import }}.{{ service_name|to_snake_case }}.apis.{{ api_name|to_snake_case }}_api import {{ api_name|to_snake_case|to_camel_case }}Api
+
+
+class {{ api_name|to_snake_case|to_camel_case }}Client({{ api_name|to_snake_case|to_camel_case }}Api):
+    ...
