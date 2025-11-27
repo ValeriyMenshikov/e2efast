@@ -1,0 +1,28 @@
+import os
+import pytest
+from httpx import {{ http_client_import }}
+{% for fixture in fixtures -%}
+from {{ child_client_import }}.{{ service_module }}.{{ fixture.api_module }}_client import {{ fixture.api_client_class }}
+{% endfor -%}
+{% if models_to_import %}
+from {{ models_import }} import {{ models_to_import | join(', ') }}
+{% endif %}
+
+
+__all__ = [
+    "{{ service_fixture_name }}",
+{% for fixture in fixtures %}    "{{ fixture.fixture_name }}",
+{% endfor %}]
+
+
+@pytest.fixture
+{% if async_mode %}async {% endif %}def {{ service_fixture_name }}() -> {{ http_client_class }}:
+    return {{ http_client_class }}(base_url=os.getenv("{{ service_module | upper }}_BASE_URL"))
+
+
+{% for fixture in fixtures %}@pytest.fixture
+{% if async_mode %}async {% endif %}def {{ fixture.fixture_name }}({{ service_fixture_name }}: {{ http_client_class }}) -> {{ fixture.api_client_class }}:
+    return {{ fixture.api_client_class }}(api_client={{ service_fixture_name }})
+
+
+{% endfor %}
