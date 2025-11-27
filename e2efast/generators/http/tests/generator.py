@@ -8,6 +8,7 @@ from restcodegen.generator.utils import (
     create_and_write_file,
     name_to_snake,
     snake_to_camel,
+format_file
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
@@ -47,6 +48,7 @@ class TestGenerator(BaseTemplateGenerator):
 
     def generate(self) -> None:
         self._gen_tests()
+        format_file(str(self.base_path))
 
     def _gen_tests(self) -> None:
         service_dir = (

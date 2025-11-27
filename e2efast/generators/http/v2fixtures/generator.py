@@ -9,6 +9,7 @@ from restcodegen.generator.utils import (
     create_and_write_file,
     name_to_snake,
     snake_to_camel,
+    format_file,
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
@@ -47,6 +48,7 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
 
     def generate(self) -> None:
         self._gen_service_fixture()
+        format_file(str(self._output_path()))
 
     def _gen_service_fixture(self) -> None:
         template = self.env.get_template("service_fixture.jinja2")

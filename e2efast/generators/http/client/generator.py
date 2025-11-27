@@ -6,6 +6,7 @@ from restcodegen.generator.parser import Parser
 from restcodegen.generator.utils import (
     create_and_write_file,
     name_to_snake,
+    format_file,
 )
 
 
@@ -44,6 +45,7 @@ class ClientGenerator(BaseTemplateGenerator):
     def generate(self) -> None:
         self.rest_generator.generate()
         self._gen_child_clients()
+        format_file(str(self.child_base_path))
 
     def _gen_child_clients(self) -> None:
         service_module = name_to_snake(self.openapi_spec.service_name)
