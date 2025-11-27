@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "e2efast"
+version = "0.1.0"
+description = "Framework for fast API testing"
+authors = ["Menshikov Valeriy Sergeevich <valeriy.menshikov.1989@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "e2efast" }]
+
+[tool.poetry.dependencies]
+python = ">=3.10, <4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
