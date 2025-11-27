@@ -10,8 +10,8 @@ from restcodegen.generator.utils import (
 
 
 class ClientGenerator(BaseTemplateGenerator):
-    BASE_PATH = Path(".") / "internal" / "clients" / "http"
-    CHILD_CLIENTS_PATH = Path(".") / "clients" / "http"
+    BASE_PATH = Path("") / "internal" / "clients" / "http"
+    CHILD_CLIENTS_PATH = Path("") / "clients" / "http"
 
     def __init__(
         self,
