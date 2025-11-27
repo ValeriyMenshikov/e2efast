@@ -4,7 +4,11 @@ from pathlib import Path
 
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.parser import Parser
-from restcodegen.generator.utils import create_and_write_file, name_to_snake, snake_to_camel
+from restcodegen.generator.utils import (
+    create_and_write_file,
+    name_to_snake,
+    snake_to_camel,
+)
 
 from e2efast.generators.http.client.generator import ClientGenerator
 

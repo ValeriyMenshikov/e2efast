@@ -1,0 +1,20 @@
+import pytest
+
+from {{ fixtures_import }}.{{ service_module }}_service import {{ service_class }}
+{% if models_to_import %}from {{ models_import }} import {{ models_to_import | join(', ') }}
+{% endif %}
+
+{% if async_mode %}
+@pytest.mark.asyncio
+{% endif %}
+@pytest.mark.skip
+{% if async_mode %}async {% endif %}def test_{{ method_name }}({{ service_fixture }}: {{ service_class }}):
+{% if request_body_model %}    {{ request_body_var }} = {{ request_body_model }}()
+{% endif %}
+{% for param in parameter_declarations %}    {{ param.name }} = ...
+{% endfor %}
+{% if async_mode %}    response = await {{ service_fixture }}.{{ api_accessor }}.{{ method_name }}(
+{% else %}    response = {{ service_fixture }}.{{ api_accessor }}.{{ method_name }}(
+{% endif %}{% if call_arguments %}        {{ call_arguments | join(', ') }}
+{% endif %}    )
+    assert response is not None

@@ -63,7 +63,6 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
             http_client_import=self._http_client_import_name(),
             http_client_class=self._http_client_class_name(),
             base_fixture_module=self._service_module,
-            # base_fixture_name=self._base_fixture_name(),
             child_client_import=self.child_client_import,
             clients=clients,
         )
@@ -89,7 +88,7 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
                 {
                     "api_module": module,
                     "api_client_class": self._api_client_class_name(api_name),
-                    "attribute_name": f"{module}_client",
+                    "attribute_name": module,
                 }
             )
 
