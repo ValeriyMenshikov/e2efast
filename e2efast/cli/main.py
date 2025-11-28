@@ -26,10 +26,16 @@ TEST_GENERATORS = {
 @click.argument("service", type=str)
 @click.option("--spec", "spec_url", required=True, help="OpenAPI spec URL or path")
 @click.option(
-    "--with-suite",
-    "with_suite",
+    "--with-fixtures",
+    "with_fixtures",
     is_flag=True,
-    help="Generate fixtures and tests alongside clients",
+    help="Generate fixtures alongside clients",
+)
+@click.option(
+    "--with-tests",
+    "with_tests",
+    is_flag=True,
+    help="Generate tests (implies fixtures)",
 )
 @click.option(
     "--suite-version",
@@ -41,15 +47,18 @@ TEST_GENERATORS = {
 def main(
     service: str,
     spec_url: str,
-    with_suite: bool,
+    with_fixtures: bool,
+    with_tests: bool,
     suite_version: str,
 ) -> None:
     """Generate clients, fixtures, and tests for SERVICE from SPEC."""
     parser = Parser.from_source(spec_url, package_name=service)
     ClientGenerator(openapi_spec=parser, async_mode=False).generate()
-    if with_suite:
+    generate_fixtures = with_fixtures or with_tests
+    if generate_fixtures:
         fixture_generator = FIXTURE_GENERATORS[suite_version]
         fixture_generator(openapi_spec=parser).generate()
+    if with_tests:
         test_generator = TEST_GENERATORS[suite_version]
         test_generator(openapi_spec=parser, async_mode=False).generate()
 

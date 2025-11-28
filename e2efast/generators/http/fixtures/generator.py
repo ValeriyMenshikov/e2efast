@@ -161,7 +161,6 @@ class FixtureGenerator(BaseTemplateGenerator):
             models.update(self._collect_models(context))
         return sorted(models)
 
-
     @staticmethod
     def _default_base_client_import() -> str:
         parts = [
