@@ -12,6 +12,7 @@ import pytest
 from {{ child_client_import }}.{{ service_module }}.{{ client.api_module }}_client import {{ client.api_client_class }}
 {% endfor %}
 from framework.fixtures.http.base import ClientClass
+from framework.settings.base_settings import Settings
 ClientType = TypeVar("ClientType", bound=httpx.Client)
 
 
