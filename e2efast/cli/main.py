@@ -5,6 +5,7 @@ import click
 from restcodegen.generator.parser import Parser
 
 from e2efast.generators.http.client.generator import ClientGenerator
+from e2efast.generators.http.conftest.generator import ConftestGenerator
 from e2efast.generators.http.fixtures.generator import FixtureGenerator
 from e2efast.generators.http.v2fixtures.generator import ServiceFixtureGenerator
 from e2efast.generators.http.tests.generator import TestGenerator
@@ -59,6 +60,7 @@ def main(
     if generate_fixtures:
         fixture_generator = FIXTURE_GENERATORS[suite_version]
         fixture_generator(openapi_spec=parser).generate()
+        ConftestGenerator(openapi_spec=parser).generate()
     if with_tests:
         test_generator = TEST_GENERATORS[suite_version]
         test_generator(openapi_spec=parser, async_mode=False).generate()

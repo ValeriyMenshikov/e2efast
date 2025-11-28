@@ -9,8 +9,6 @@ import pytest
 
 from framework.fixtures.http.base import ClientClass
 
-ClientType = TypeVar("ClientType", bound=httpx.Client)
-
 {% for fixture in fixtures -%}
 from {{ child_client_import }}.{{ service_module }}.{{ fixture.api_module }}_client import {{ fixture.api_client_class }}
 {% endfor -%}
@@ -21,6 +19,7 @@ __all__ = [
 {% for fixture in fixtures %}    "{{ fixture.fixture_name }}",
 {% endfor %}]
 
+ClientType = TypeVar("ClientType", bound=httpx.Client)
 
 @pytest.fixture(scope="session")
 def {{ service_fixture_name }}() -> ClientType:
