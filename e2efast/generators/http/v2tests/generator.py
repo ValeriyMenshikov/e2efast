@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from jinja2 import Template
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.parser import Parser
 from restcodegen.generator.utils import (
@@ -12,10 +13,12 @@ from restcodegen.generator.utils import (
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
+from e2efast.utils import get_version, render_header
 
 
 class ServiceTestGenerator(BaseTemplateGenerator):
     BASE_PATH = Path("") / "tests" / "http"
+    BASE_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "base_templates"
 
     def __init__(
         self,
@@ -45,6 +48,11 @@ class ServiceTestGenerator(BaseTemplateGenerator):
         )
         self.fixtures_import = fixtures_import or self._default_fixtures_import()
         self.models_import = self._build_models_import()
+        self._tool_version = get_version()
+        header_template_path = self.BASE_TEMPLATES_DIR / "header.jinja2"
+        self._header_template = Template(
+            header_template_path.read_text(encoding="utf-8")
+        )
 
         super().__init__(templates_dir=str(templates_dir))
 
@@ -97,6 +105,10 @@ class ServiceTestGenerator(BaseTemplateGenerator):
                 models_to_import = self._collect_models(context)
 
                 rendered_code = template.render(
+                    header=self._render_header(
+                        service_name=self._service_module,
+                        editable=True,
+                    ),
                     async_mode=self.async_mode,
                     service_fixture=service_fixture,
                     service_module=self._service_module,
@@ -201,6 +213,14 @@ class ServiceTestGenerator(BaseTemplateGenerator):
             part for part in ClientGenerator.BASE_PATH.parts if part not in {"", "."}
         ]
         return ".".join(parts)
+
+    def _render_header(self, *, service_name: str, editable: bool) -> str:
+        return render_header(
+            self._header_template,
+            version=self._tool_version,
+            service_name=service_name,
+            can_edit=editable,
+        )
 
     @staticmethod
     def _default_child_client_import() -> str:

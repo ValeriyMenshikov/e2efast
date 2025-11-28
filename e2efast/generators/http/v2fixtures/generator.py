@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from jinja2 import Template
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.parser import Parser
 from restcodegen.generator.utils import (
@@ -13,10 +14,12 @@ from restcodegen.generator.utils import (
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
+from e2efast.utils import get_version, render_header
 
 
 class ServiceFixtureGenerator(BaseTemplateGenerator):
     BASE_PATH = Path("") / "framework" / "fixtures" / "http"
+    BASE_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "base_templates"
 
     def __init__(
         self,
@@ -41,7 +44,11 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
         self.child_client_import = (
             child_client_import or self._default_child_client_import()
         )
-
+        self._tool_version = get_version()
+        header_template_path = self.BASE_TEMPLATES_DIR / "header.jinja2"
+        self._header_template = Template(
+            header_template_path.read_text(encoding="utf-8")
+        )
         super().__init__(templates_dir=str(templates_dir))
 
     def generate(self) -> None:
@@ -51,7 +58,9 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
 
     def _gen_base_fixture(self) -> None:
         template = self.env.get_template("base.jinja2")
-        rendered = template.render()
+        rendered = template.render(
+            header=self._render_header(service_name="fixtures.base", editable=True)
+        )
         create_and_write_file(self.base_path / "base.py", rendered)
 
     def _gen_service_fixture(self) -> None:
@@ -62,9 +71,13 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
             return
 
         rendered = template.render(
+            header=self._render_header(
+                service_name=self._service_module,
+                editable=False,
+            ),
             service_module=self._service_module,
             service_class=self._service_class_name(),
-            service_fixture_name=self._service_fixture_name(),
+            service_fixture_name=f"{self._service_module}_service",
             base_fixture_module=self._service_module,
             child_client_import=self.child_client_import,
             clients=clients,
@@ -136,6 +149,14 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
             part for part in ClientGenerator.BASE_PATH.parts if part not in {"", "."}
         ]
         return ".".join(parts)
+
+    def _render_header(self, *, service_name: str, editable: bool) -> str:
+        return render_header(
+            self._header_template,
+            version=self._tool_version,
+            service_name=service_name,
+            can_edit=editable,
+        )
 
     @staticmethod
     def _default_child_client_import() -> str:

@@ -1,6 +1,7 @@
 from pathlib import Path
 from shutil import rmtree
 
+from jinja2 import Template
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.codegen import RESTClientGenerator
 from restcodegen.generator.parser import Parser
@@ -10,10 +11,13 @@ from restcodegen.generator.utils import (
     format_file,
 )
 
+from e2efast.utils import get_version, render_header
+
 
 class ClientGenerator(BaseTemplateGenerator):
     BASE_PATH = Path("") / "internal" / "clients" / "http"
     CHILD_CLIENTS_PATH = Path("") / "framework" / "clients" / "http"
+    BASE_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "base_templates"
 
     def __init__(
         self,
@@ -34,6 +38,11 @@ class ClientGenerator(BaseTemplateGenerator):
 
         self.openapi_spec = openapi_spec
         self._service_name = name_to_snake(openapi_spec.service_name)
+        self._tool_version = get_version()
+        header_template_path = self.BASE_TEMPLATES_DIR / "header.jinja2"
+        self._header_template = Template(
+            header_template_path.read_text(encoding="utf-8")
+        )
         self.rest_generator = RESTClientGenerator(
             openapi_spec=openapi_spec,
             # TODO: сделать прием шаблонов для RESTClientGenerator
@@ -74,11 +83,18 @@ class ClientGenerator(BaseTemplateGenerator):
         create_and_write_file(child_service_path / "__init__.py", "# coding: utf-8\n")
 
         template = self.env.get_template("client.jinja2")
+        header = render_header(
+            self._header_template,
+            version=self._tool_version,
+            service_name=self.openapi_spec.service_name,
+            can_edit=True,
+        )
         for api_name in self.openapi_spec.apis:
             rendered_code = template.render(
                 api_name=api_name,
                 service_name=self.openapi_spec.service_name,
                 base_import=self.rest_generator._base_import,
+                header=header,
             )
             file_path = child_service_path / f"{name_to_snake(api_name)}_client.py"
             create_and_write_file(file_path, rendered_code)

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from jinja2 import Template
 from restcodegen.generator.base import BaseTemplateGenerator
 from restcodegen.generator.parser import Parser
 from restcodegen.generator.utils import (
@@ -12,10 +13,12 @@ from restcodegen.generator.utils import (
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
+from e2efast.utils import get_version, render_header
 
 
 class FixtureGenerator(BaseTemplateGenerator):
     BASE_PATH = Path("") / "framework" / "fixtures" / "http"
+    BASE_TEMPLATES_DIR = Path(__file__).resolve().parents[2] / "base_templates"
 
     def __init__(
         self,
@@ -40,6 +43,11 @@ class FixtureGenerator(BaseTemplateGenerator):
         self.child_client_import = (
             child_client_import or self._default_child_client_import()
         )
+        self._tool_version = get_version()
+        header_template_path = self.BASE_TEMPLATES_DIR / "header.jinja2"
+        self._header_template = Template(
+            header_template_path.read_text(encoding="utf-8")
+        )
         super().__init__(templates_dir=str(templates_dir))
 
     def generate(self) -> None:
@@ -49,7 +57,9 @@ class FixtureGenerator(BaseTemplateGenerator):
 
     def _gen_base_fixture(self) -> None:
         template = self.env.get_template("base.jinja2")
-        rendered = template.render()
+        rendered = template.render(
+            header=self._render_header(service_name="fixtures.base", editable=True)
+        )
         create_and_write_file(self.base_path / "base.py", rendered)
 
     def _gen_fixtures(self) -> None:
@@ -91,6 +101,10 @@ class FixtureGenerator(BaseTemplateGenerator):
             return
 
         rendered_code = template.render(
+            header=self._render_header(
+                service_name=self._service_module,
+                editable=False,
+            ),
             child_client_import=self.child_client_import,
             service_module=self._service_module,
             fixtures=fixtures,
@@ -175,3 +189,11 @@ class FixtureGenerator(BaseTemplateGenerator):
         if base.name == self._service_module and base.suffix == "":
             return base.with_suffix(".py")
         return base / f"{self._service_module}.py"
+
+    def _render_header(self, *, service_name: str, editable: bool) -> str:
+        return render_header(
+            self._header_template,
+            version=self._tool_version,
+            service_name=service_name,
+            can_edit=editable,
+        )
