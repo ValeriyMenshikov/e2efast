@@ -103,6 +103,16 @@ pytest_plugins = ["framework.fixtures.http.service_name"]
 
 Replace `service_name` with the snake_case module generated in `framework/fixtures/http` (for example the CLI run above produces `framework/fixtures/http/customers.py`, so use `pytest_plugins = ["framework.fixtures.http.customers"]`).
 
+## 🌐 Environment Variables
+
+Each generated fixture module reads a service-specific base URL from `os.getenv("<SERVICE_NAME>_BASE_URL")`. Define this environment variable before running fixtures or the generated tests—for example:
+
+```bash
+export CUSTOMERS_BASE_URL="https://api.example.test"
+```
+
+The variable name is derived from the snake_case service module uppercased with `_BASE_URL` appended (e.g. `customers` → `CUSTOMERS_BASE_URL`).
+
 ## 🛠️ Development Workflow
 
 ```bash
