@@ -18,7 +18,7 @@ E2Efast wraps the `restcodegen` toolkit and adds project-specific generators tha
 
 ### ✨ Key Features
 
-- **One-command workflow** – Generate clients, fixtures, and tests with a single CLI invocation.@e2efast/cli/main.py#25-54
+- **One-command workflow** – Generate clients, fixtures, and tests with a single CLI invocation.
 - **Safe regeneration** – Internal clients are regenerated automatically while editable facades live under `framework/clients/http` for manual customisations.
 - **Fixture suite versions** – Choose per-client fixtures (suite `v1`) or aggregated service fixtures and tests (suite `v2`).
 - **Custom HTTP layer** – Override a single `ClientClass` alias to switch between `httpx.Client`, `AsyncClient`, or your own subclass across all fixtures.
@@ -61,7 +61,7 @@ poetry run e2efast customers --spec ./crm_v2_service.json --with-tests --suite-v
 | `--with-tests` | Generate tests (fixtures implied) | ❌ | `False` |
 | `--suite-version` | Fixture/test style: `v1` (per-client) or `v2` (service facade) | ❌ | `v2` |
 
-The CLI parses the specification once and reuses the resulting parser for each generator, ensuring all outputs remain consistent.@e2efast/cli/main.py#41-54
+The CLI parses the specification once and reuses the resulting parser for each generator, ensuring all outputs remain consistent.
 
 ## 📁 Generated Structure
 
@@ -79,7 +79,7 @@ Re-run the CLI whenever the OpenAPI spec changes; generated files are overwritte
 
 ## 🔄 Custom HTTP Client
 
-Every fixture imports `ClientClass` from `framework/fixtures/http/base.py`. Update this alias to point at any `httpx.Client` subclass and regenerated fixtures automatically adopt the change.@e2efast/generators/http/fixtures/templates/fixture.jinja2#1-18@e2efast/generators/http/v2fixtures/templates/fixture.jinja2#1-12
+Every fixture imports `ClientClass` from `framework/fixtures/http/base.py`. Update this alias to point at any `httpx.Client` subclass and regenerated fixtures automatically adopt the change.
 
 ```python
 import httpx
