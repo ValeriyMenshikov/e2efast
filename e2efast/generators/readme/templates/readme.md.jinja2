@@ -44,6 +44,12 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
    ```bash
    export {{ service_env_var }}="https://api.example.test"
    ```
+   or
+   ```python
+   # conftest.py
+   import os
+   os.environ["{{ service_env_var }}"] = "https://api.example.test"
+   ```
 
    The fixtures will reuse this environment variable when creating HTTP clients.
 
