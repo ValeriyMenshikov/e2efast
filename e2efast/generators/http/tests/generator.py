@@ -15,7 +15,7 @@ from e2efast.generators.http.client.generator import ClientGenerator
 
 
 class TestGenerator(BaseTemplateGenerator):
-    BASE_PATH = Path("") / "tests"
+    BASE_PATH = Path("") / "tests" / "http"
 
     def __init__(
         self,
@@ -56,6 +56,10 @@ class TestGenerator(BaseTemplateGenerator):
             if self.base_path.name == self._service_module
             else self.base_path / self._service_module
         )
+
+        parent_package = self.base_path.parent
+        if parent_package != self.base_path:
+            self._ensure_init_file(parent_package / "__init__.py")
 
         self._ensure_init_file(self.base_path / "__init__.py")
         self._ensure_init_file(service_dir / "__init__.py")

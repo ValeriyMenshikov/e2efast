@@ -71,7 +71,8 @@ framework/
   fixtures/http/       # Generated pytest fixtures + base ClientClass hook
 internal/
   clients/http/        # Auto-generated REST clients and models
-tests/                 # Optional pytest suite generated when --with-suite is enabled
+tests/
+  http/               # Optional pytest suite generated when --with-tests is enabled
 ```
 
 Re-run the CLI whenever the OpenAPI spec changes; generated files are overwritten, while your custom facades remain intact.
