@@ -24,7 +24,7 @@ class {{ service_class }}:
 @pytest.fixture(scope="session")
 def {{ service_fixture_name }}_client() -> ClientType:
     client =  ClientClass()
-    client.base_url = os.getenv("{{ service_module | upper }}_BASE_URL")
+    client.base_url = Settings().{{ service_module }}
     return client
 
 

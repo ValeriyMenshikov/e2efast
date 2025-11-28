@@ -3,8 +3,6 @@ from functools import partial
 
 import httpx
 
-from framework.settings.base_settings import Settings
-
 """
 You can redefine client class for own needs, client should be a subclass of httpx.Client
 
@@ -20,5 +18,7 @@ Example:
 
 """
 
-settings = Settings()
-ClientClass = partial(httpx.Client, timeout=httpx.Timeout(60.0))
+ClientClass = partial(
+    httpx.Client,
+    timeout=httpx.Timeout(60.0),
+)

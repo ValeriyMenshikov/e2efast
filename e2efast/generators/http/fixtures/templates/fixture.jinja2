@@ -8,6 +8,7 @@ import httpx
 import pytest
 
 from framework.fixtures.http.base import ClientClass
+from framework.settings.base_settings import Settings
 
 {% for fixture in fixtures -%}
 from {{ child_client_import }}.{{ service_module }}.{{ fixture.api_module }}_client import {{ fixture.api_client_class }}
@@ -24,7 +25,7 @@ ClientType = TypeVar("ClientType", bound=httpx.Client)
 @pytest.fixture(scope="session")
 def {{ service_fixture_name }}() -> ClientType:
     client = ClientClass()
-    client.base_url = base_url=os.getenv("{{ service_module | upper }}_BASE_URL")
+    client.base_url = Settings().{{ service_module }}
     return client
 
 
