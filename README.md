@@ -23,6 +23,10 @@ E2Efast wraps the `restcodegen` toolkit and adds project-specific generators tha
 - **Fixture suite versions** – Choose per-client fixtures (suite `v1`) or aggregated service fixtures and tests (suite `v2`).
 - **Custom HTTP layer** – Override a single `ClientClass` alias to switch between `httpx.Client`, `AsyncClient`, or your own subclass across all fixtures.
 
+## 📚 Example Project
+
+Want to see a complete scaffold created by e2efast? Check out the sample repository: [e2efast-project-example](https://github.com/ValeriyMenshikov/e2efast-project-example).
+
 ## 📦 Installation
 
 Install project dependencies with Poetry:
