@@ -43,6 +43,12 @@ Run the generator by providing the service name and OpenAPI spec location:
 poetry run e2efast customers --spec ./crm_v2_service.json
 ```
 
+The `--spec` option accepts either a local file path or an HTTP(S) URL. For example:
+
+```bash
+poetry run e2efast customers --spec https://example.com/openapi.json --with-tests
+```
+
 Generate fixtures alongside the clients:
 
 ```bash
