@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "e2efast"
-version = "0.2.3"
+version = "0.3.0"
 description = "Framework for fast Е2Е API testing"
 authors = ["Menshikov Valeriy Sergeevich <valeriy.menshikov.1989@gmail.com>"]
 readme = "README.md"
