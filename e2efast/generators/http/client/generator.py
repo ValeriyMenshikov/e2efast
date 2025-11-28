@@ -97,4 +97,6 @@ class ClientGenerator(BaseTemplateGenerator):
                 header=header,
             )
             file_path = child_service_path / f"{name_to_snake(api_name)}_client.py"
+            if file_path.exists():
+                continue
             create_and_write_file(file_path, rendered_code)
