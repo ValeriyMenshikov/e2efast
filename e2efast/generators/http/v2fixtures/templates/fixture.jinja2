@@ -18,11 +18,11 @@ class {{ service_class }}:
 {% for client in clients %}        self.{{ client.attribute_name }} = {{ client.api_client_class }}(api_client=api_client)
 {% endfor %}
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def {{ service_fixture_name }}_client() -> ClientClass:
     return ClientClass(base_url=os.getenv("{{ service_module | upper }}_BASE_URL"))
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def {{ service_fixture_name }}({{ service_fixture_name }}_client: ClientClass) -> {{ service_class }}:
     return {{ service_class }}(api_client={{ service_fixture_name }}_client)

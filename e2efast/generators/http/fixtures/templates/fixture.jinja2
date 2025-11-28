@@ -16,12 +16,12 @@ __all__ = [
 {% endfor %}]
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def {{ service_fixture_name }}() -> ClientClass:
     return {{ ClientClass }}(base_url=os.getenv("{{ service_module | upper }}_BASE_URL"))
 
 
-{% for fixture in fixtures %}@pytest.fixture
+{% for fixture in fixtures %}@pytest.fixture(scope="session")
 def {{ fixture.fixture_name }}({{ service_fixture_name }}: ClientClass) -> {{ fixture.api_client_class }}:
     return {{ fixture.api_client_class }}(api_client={{ service_fixture_name }})
 

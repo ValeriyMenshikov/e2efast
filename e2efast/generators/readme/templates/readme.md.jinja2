@@ -1,0 +1,63 @@
+# {{ service_name | to_camel_case }} Service API tests project
+
+> Generated automatically by **e2efast**.
+
+## Overview
+
+This project was scaffolded from the OpenAPI specification for the `{{ service_name }}` service. The codebase is organised to keep generated artefacts separate from the places where you add custom logic, making it safe to rerun the generator whenever the contract changes.
+
+## Project Structure
+
+```
+├── framework                     # User-facing extension layer
+│    ├── clients
+│    │    └── http
+│    │        ├── schemas               # OpenAPI schemas for all generated APIs
+│    │        └── {{ service_module }}          # Service namespace for editable wrappers
+│    │            ├── apis              # Generated API client classes (safe to extend)
+│    │            └── models            # Pydantic models imported by wrappers
+│    └── fixtures
+│         └── http
+│             └── {{ service_module }}.py       # Fixtures for wrapper clients
+│
+├── internal                      # Auto-regenerated low-level clients
+│    └── clients
+│         └── http/{{ service_module }}/        # REST clients & models (overwritten on regen)
+│
+└── tests                         # Generated or custom test suites
+     └── http/{{ service_module }}            # Generated test suite (if enabled)
+```
+
+* **internal** – contains the raw clients and data models produced by `restcodegen`. These files are overwritten on each generation. If you need a technical helper (e.g. custom HTTP adapter or DB-aware client), place it in another module to avoid losing changes.
+* **framework/clients/http/{{ service_module }}** – hosts subclasses of the generated clients. Override methods here to simplify calls or add project-specific behaviour. Files in this folder are **not** overwritten after the first generation.
+* **framework/fixtures/http/{{ service_module }}.py** – pytest fixtures that instantiate the wrapper clients. They provide a single entry point for the HTTP client configuration used inside tests.
+
+## Using the Fixtures
+
+1. Expose the fixtures to pytest by adding the generated module to `pytest_plugins` in your root `conftest.py`:
+
+   ```python
+   pytest_plugins = ["fixtures.http.{{ service_module }}"]
+   ```
+
+2. Export the base URL for the service before running tests:
+
+   ```bash
+   export {{ service_env_var }}="https://api.example.test"
+   ```
+
+   The fixtures will reuse this environment variable when creating HTTP clients.
+
+## Regeneration Guidelines
+
+- Re-run `e2efast` each time the OpenAPI specification changes. The generator will refresh `internal/` and fixture code while leaving your custom wrappers untouched.
+- Keep custom business logic inside the `clients/http/{{ service_module }}` package or other user-created modules.
+- If you introduce additional fixtures, remember to register their module path in `pytest_plugins` as well.
+
+## Additional Resources
+
+- Source generator: [e2efast](https://pypi.org/project/e2efast/)
+
+---
+
+Generated on {{ now | default('runtime') }} by `e2efast` from the `{{ service_name }}` specification.

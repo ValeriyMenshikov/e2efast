@@ -9,6 +9,7 @@ from e2efast.generators.http.fixtures.generator import FixtureGenerator
 from e2efast.generators.http.v2fixtures.generator import ServiceFixtureGenerator
 from e2efast.generators.http.tests.generator import TestGenerator
 from e2efast.generators.http.v2tests.generator import ServiceTestGenerator
+from e2efast.generators.readme.generator import ReadmeGenerator
 
 
 FIXTURE_GENERATORS = {
@@ -61,6 +62,7 @@ def main(
     if with_tests:
         test_generator = TEST_GENERATORS[suite_version]
         test_generator(openapi_spec=parser, async_mode=False).generate()
+        ReadmeGenerator(openapi_spec=parser).generate()
 
 
 if __name__ == "__main__":
