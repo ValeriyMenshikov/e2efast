@@ -7,8 +7,10 @@ from pydantic import Field
 class Settings(BaseSettings):
     """Environment-driven configuration for HTTP clients."""
 
-    {{ service_module }}: str = Field(
-        ..., alias="{{ service_env_var }}", description="Base URL for the service"
+    {{ service_module }}: str | None = Field(
+        default=None,
+        alias="{{ service_env_var }}",
+        description="Base URL for the service",
     )
 
 
