@@ -6,6 +6,33 @@
 
 This project was scaffolded from the OpenAPI specification for the `{{ service_name }}` service. The codebase is organised to keep generated artefacts separate from the places where you add custom logic, making it safe to rerun the generator whenever the contract changes.
 
+## Quick Start
+
+1. Run the generator (adjusting service name/spec as needed). The `--spec`
+   option accepts either a local file path or an HTTP(S) URL:
+
+   ```bash
+   poetry run e2efast {{ service_module }} --spec ./openapi.json --with-tests
+   ```
+
+2. Open `framework/settings/base_settings.py` and update the base URL or any
+   other settings you require.
+
+3. Export the environment variables (or ensure they are provided via your
+   settings loader) and start writing tests—the generated clients, fixtures, and
+   tests will use the configuration automatically.
+
+   On the first run the generator creates `framework/settings/base_settings.py`
+   and, when fixtures are enabled, `tests/conftest.py`. Subsequent updates should
+   be applied manually.
+
+4. Need only clients and fixtures (without tests)? Run the same command with
+   `--with-fixtures` (the `--spec` option still accepts a path or URL):
+
+   ```bash
+   poetry run e2efast {{ service_module }} --spec ./openapi.json --with-fixtures
+   ```
+
 ## Project Structure
 
 ```
@@ -13,9 +40,12 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
 │    ├── clients
 │    │    └── http
 │    │        └── {{ service_module }}          # Service namespace for editable wrappers
-│    └── fixtures
-│         └── http
-│             └── {{ service_module }}.py       # Fixtures for wrapper clients (overwritten on regen)
+│    ├── fixtures
+│    │     └── http
+│    │         ├── base.py             # Define ClientClass alias (editable)
+│    │         └── {{ service_module }}.py      # Fixtures for wrapper clients (overwritten on regen)
+│    └── settings
+│         └── base_settings.py         # Pydantic settings scaffold (generated once)
 │
 ├── internal                           # Auto-regenerated low-level clients
 │    └── clients
@@ -25,7 +55,9 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
 │                └── models            # Pydantic models
 │
 └── tests                              # Generated or custom test suites
-     └── http/{{ service_module }}            # Generated test suite (if enabled)
+     ├── conftest.py                   # pytest plugin registration (generated once)
+     └── http
+          └── {{ service_module }}            # Generated test suite (if enabled)
 ```
 * **internal** – contains the raw clients and data models produced by `restcodegen`. These files are overwritten on each generation. If you need a technical helper (e.g. custom HTTP adapter or DB-aware client), place it in another module to avoid losing changes.
 * **framework/clients/http/{{ service_module }}** – hosts subclasses of the generated clients. Override methods here to simplify calls or add project-specific behaviour. Files in this folder are **not** overwritten after the first generation.
@@ -52,6 +84,17 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
    ```
 
    The fixtures will reuse this environment variable when creating HTTP clients.
+
+3. If you need to change the HTTP client implementation globally, edit
+   `framework/fixtures/http/base.py` and update `ClientClass`. Every generated
+   fixture imports that alias and will pick up the override automatically.
+
+4. Initial configuration settings are scaffolded in
+   `framework/settings/base_settings.py`. The file is generated only on the
+   first run—afterwards you should maintain it manually (for example, to point at
+   different hosts or add extra parameters). The expected environment variable
+   names follow the pattern `<package_name_upper>_BASE_URL`; you can confirm the
+   exact name inside any generated fixture (look for the `os.getenv` call).
 
 ## Regeneration Guidelines
 

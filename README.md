@@ -27,35 +27,50 @@ E2Efast wraps the `restcodegen` toolkit and adds project-specific generators tha
 
 Want to see a complete scaffold created by e2efast? Check out the sample repository: [e2efast-project-example](https://github.com/ValeriyMenshikov/e2efast-project-example).
 
+## ⚡ Quick Start
+
+1. Install project dependencies with Poetry:
+
+   ```bash
+   poetry install
+   ```
+
+2. Run the generator (adjust service name/spec as needed). The `--spec` option
+   accepts either a local file path or an HTTP(S) URL:
+
+   ```bash
+   poetry run e2efast customers --spec ./crm_v2_service.json --with-tests
+   ```
+
+3. Open `framework/settings/base_settings.py` and update the base URL or any
+   other settings you require.
+
+4. Export the environment variables (or ensure they are provided via your
+   settings loader) and start writing tests—the generated clients, fixtures, and
+   tests will use the configuration automatically.
+
+   On the first run the generator creates `framework/settings/base_settings.py`
+   and, when fixtures are enabled, `tests/conftest.py`. Subsequent updates should
+   be applied manually.
+
+5. Need only clients and fixtures (without tests)? Run the same command with
+   `--with-fixtures` (the `--spec` option still accepts a path or URL):
+
+   ```bash
+   poetry run e2efast customers --spec ./crm_v2_service.json --with-fixtures --suite-version v2
+   ```
+
 ## 📦 Installation
 
-Install project dependencies with Poetry:
+Install the library itself from PyPI:
 
 ```bash
-poetry install
+pip install e2efast
 ```
 
 ## 🔧 CLI Usage
 
-Run the generator by providing the service name and OpenAPI spec location:
-
-```bash
-poetry run e2efast customers --spec ./crm_v2_service.json
-```
-
-The `--spec` option accepts either a local file path or an HTTP(S) URL. For example:
-
-```bash
-poetry run e2efast customers --spec https://example.com/openapi.json --with-tests
-```
-
-Generate fixtures alongside the clients:
-
-```bash
-poetry run e2efast customers --spec ./crm_v2_service.json --with-fixtures --suite-version v2
-```
-
-Add service-oriented tests (fixtures implied):
+Run the generator by providing the service name and OpenAPI spec location (path or URL):
 
 ```bash
 poetry run e2efast customers --spec ./crm_v2_service.json --with-tests --suite-version v2
@@ -76,13 +91,28 @@ The CLI parses the specification once and reuses the resulting parser for each g
 ## 📁 Generated Structure
 
 ```
-framework/
-  clients/http/        # Editable facade clients (safe to modify)
-  fixtures/http/       # Generated pytest fixtures + base ClientClass hook
-internal/
-  clients/http/        # Auto-generated REST clients and models
-tests/
-  http/               # Optional pytest suite generated when --with-tests is enabled
+├── framework                          # User-facing extension layer
+│    ├── clients
+│    │    └── http
+│    │         └── <service>/          # Editable client wrappers (safe to modify)
+│    ├── fixtures
+│    │    └── http
+│    │         ├── base.py             # Define ClientClass alias (editable)
+│    │         └── <service>.py        # Generated fixtures (overwritten on regen)
+│    └── settings
+│         └── base_settings.py         # Pydantic settings scaffold (generated once)
+│
+├── internal                           # Auto-regenerated low-level clients
+│    └── clients
+│         └── http
+│              └── <service>/
+│                  ├── apis            # Generated API client classes
+│                  └── models          # Pydantic models
+│
+└── tests                              # Generated or custom test suites
+     ├── conftest.py                   # pytest plugin registration (generated once)
+     └── http
+          └── <service>/               # Generated test suite (if enabled)
 ```
 
 Re-run the CLI whenever the OpenAPI spec changes; generated files are overwritten, while your custom facades remain intact.
@@ -92,9 +122,11 @@ Re-run the CLI whenever the OpenAPI spec changes; generated files are overwritte
 Every fixture imports `ClientClass` from `framework/fixtures/http/base.py`. Update this alias to point at any `httpx.Client` subclass and regenerated fixtures automatically adopt the change.
 
 ```python
+from functools import partial
+
 import httpx
 
-ClientClass = httpx.Client
+ClientClass = partial(httpx.Client, timeout=httpx.Timeout(60.0))
 
 # Example override:
 # from httpx import AsyncClient
@@ -122,7 +154,7 @@ Each generated fixture module reads a service-specific base URL from `os.getenv(
 export CUSTOMERS_BASE_URL="https://api.example.test"
 ```
 
-The variable name is derived from the snake_case service module uppercased with `_BASE_URL` appended (e.g. `customers` → `CUSTOMERS_BASE_URL`).
+The variable name is derived from the snake_case service module uppercased with `_BASE_URL` appended (e.g. `customers` → `CUSTOMERS_BASE_URL`). The expected names follow the pattern `<package_name_upper>_BASE_URL`; you can confirm the exact value inside any generated fixture (look for the `os.getenv` call).
 
 ## 🛠️ Development Workflow
 
