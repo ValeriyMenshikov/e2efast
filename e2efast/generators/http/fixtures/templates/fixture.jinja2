@@ -1,8 +1,16 @@
 {{ header }}
 
 import os
+from typing import TypeVar
+
+import httpx
+
 import pytest
+
 from framework.fixtures.http.base import ClientClass
+
+ClientType = TypeVar("ClientType", bound=httpx.Client)
+
 {% for fixture in fixtures -%}
 from {{ child_client_import }}.{{ service_module }}.{{ fixture.api_module }}_client import {{ fixture.api_client_class }}
 {% endfor -%}
@@ -15,12 +23,14 @@ __all__ = [
 
 
 @pytest.fixture(scope="session")
-def {{ service_fixture_name }}() -> ClientClass:
-    return {{ ClientClass }}(base_url=os.getenv("{{ service_module | upper }}_BASE_URL"))
+def {{ service_fixture_name }}() -> ClientType:
+    client = ClientClass()
+    client.base_url = base_url=os.getenv("{{ service_module | upper }}_BASE_URL")
+    return client
 
 
 {% for fixture in fixtures %}@pytest.fixture(scope="session")
-def {{ fixture.fixture_name }}({{ service_fixture_name }}: ClientClass) -> {{ fixture.api_client_class }}:
+def {{ fixture.fixture_name }}({{ service_fixture_name }}: ClientType) -> {{ fixture.api_client_class }}:
     return {{ fixture.api_client_class }}(api_client={{ service_fixture_name }})
 
 

@@ -85,15 +85,11 @@ class FixtureGenerator(BaseTemplateGenerator):
             client_class = self._api_client_class_name(api_name)
             fixture_name = f"{api_module}_client"
 
-            models = self._collect_models_for_operations(operations)
-            all_models.update(models)
-
             fixtures.append(
                 {
                     "api_module": api_module,
                     "api_client_class": client_class,
                     "fixture_name": fixture_name,
-                    "models": models,
                 }
             )
 
@@ -155,25 +151,6 @@ class FixtureGenerator(BaseTemplateGenerator):
     @staticmethod
     def _api_client_class_name(api_name: str) -> str:
         return f"{snake_to_camel(name_to_snake(api_name))}Client"
-
-    @staticmethod
-    def _collect_models(context) -> list[str]:
-        models: set[str] = set()
-        if context.request_body_model:
-            models.add(context.request_body_model)
-        if context.success_response and context.success_response not in {
-            "Response",
-            "None",
-        }:
-            models.add(context.success_response)
-        return sorted(models)
-
-    def _collect_models_for_operations(self, operations: list) -> list[str]:
-        models: set[str] = set()
-        for operation in operations:
-            context = self.openapi_spec.get_operation_context(operation)
-            models.update(self._collect_models(context))
-        return sorted(models)
 
     @staticmethod
     def _default_base_client_import() -> str:
