@@ -8,7 +8,7 @@ packages = [{ include = "e2efast" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10, <4.0"
-restcodegen = {git = "https://github.com/ValeriyMenshikov/restcodegen.git"}
+restcodegen = ">=2.0.1"
 
 [tool.poetry.scripts]
 e2efast = "e2efast.cli.main:main"
