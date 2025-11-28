@@ -9,25 +9,24 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
 ## Project Structure
 
 ```
-├── framework                     # User-facing extension layer
+├── framework                          # User-facing extension layer
 │    ├── clients
 │    │    └── http
-│    │        ├── schemas               # OpenAPI schemas for all generated APIs
 │    │        └── {{ service_module }}          # Service namespace for editable wrappers
-│    │            ├── apis              # Generated API client classes (safe to extend)
-│    │            └── models            # Pydantic models imported by wrappers
 │    └── fixtures
 │         └── http
-│             └── {{ service_module }}.py       # Fixtures for wrapper clients
+│             └── {{ service_module }}.py       # Fixtures for wrapper clients (overwritten on regen)
 │
-├── internal                      # Auto-regenerated low-level clients
+├── internal                           # Auto-regenerated low-level clients
 │    └── clients
-│         └── http/{{ service_module }}/        # REST clients & models (overwritten on regen)
+│        └── http                      # REST clients & models (overwritten on regen)
+│            └── {{ service_module }}
+│                ├── apis              # Generated API client classes
+│                └── models            # Pydantic models
 │
-└── tests                         # Generated or custom test suites
+└── tests                              # Generated or custom test suites
      └── http/{{ service_module }}            # Generated test suite (if enabled)
 ```
-
 * **internal** – contains the raw clients and data models produced by `restcodegen`. These files are overwritten on each generation. If you need a technical helper (e.g. custom HTTP adapter or DB-aware client), place it in another module to avoid losing changes.
 * **framework/clients/http/{{ service_module }}** – hosts subclasses of the generated clients. Override methods here to simplify calls or add project-specific behaviour. Files in this folder are **not** overwritten after the first generation.
 * **framework/fixtures/http/{{ service_module }}.py** – pytest fixtures that instantiate the wrapper clients. They provide a single entry point for the HTTP client configuration used inside tests.
@@ -37,7 +36,7 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
 1. Expose the fixtures to pytest by adding the generated module to `pytest_plugins` in your root `conftest.py`:
 
    ```python
-   pytest_plugins = ["fixtures.http.{{ service_module }}"]
+   pytest_plugins = ["framework.fixtures.http.{{ service_module }}"]
    ```
 
 2. Export the base URL for the service before running tests:
