@@ -18,7 +18,7 @@ def get_dependencies() -> list[dict[str, str]]:
 def get_version() -> str:
     deps = get_dependencies()
     for dep in deps:
-        if dep["path"] == "restcodegen":
+        if dep["path"] == "e2efast":
             return dep["version"]
     return "unknown"
 
