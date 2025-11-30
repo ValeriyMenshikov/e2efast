@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 
 from jinja2 import Template
@@ -39,19 +40,24 @@ class SettingsGenerator(BaseTemplateGenerator):
 
     def generate(self) -> None:
         output_path = self.base_path / self.OUTPUT_PATH
-        if output_path.exists():
-            return
-
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         template = self.env.get_template("settings.jinja2")
         rendered = template.render(
             header=self._render_header(editable=True),
             service_module=self._service_module,
-            service_env_var=f"{self._service_module.upper()}_BASE_URL",
+            service_env_var=self._service_env_var,
         )
 
-        create_and_write_file(output_path, rendered)
+        if not output_path.exists():
+            create_and_write_file(output_path, rendered)
+            return
+
+        self._append_field_if_missing(output_path)
+
+    @property
+    def _service_env_var(self) -> str:
+        return f"{self._service_module.upper()}_BASE_URL"
 
     def _render_header(self, *, editable: bool) -> str:
         return render_header(
@@ -60,3 +66,60 @@ class SettingsGenerator(BaseTemplateGenerator):
             service_name=self._service_name,
             can_edit=editable,
         )
+
+    def _append_field_if_missing(self, output_path: Path) -> None:
+        existing_content = output_path.read_text(encoding="utf-8")
+
+        try:
+            module = ast.parse(existing_content, type_comments=True)
+        except SyntaxError:
+            # If the file was heavily modified, fall back to no-op to avoid breaking user code.
+            return
+
+        settings_class = None
+        for node in module.body:
+            if isinstance(node, ast.ClassDef) and node.name == "Settings":
+                settings_class = node
+                break
+
+        if settings_class is None:
+            return
+
+        for node in settings_class.body:
+            if isinstance(node, ast.AnnAssign):
+                target = node.target
+                if isinstance(target, ast.Name) and target.id == self._service_module:
+                    return
+
+        indent = "    "
+        for node in settings_class.body:
+            if hasattr(node, "col_offset"):
+                indent = " " * node.col_offset
+                break
+
+        insert_after_line = max(
+            getattr(node, "end_lineno", settings_class.lineno) for node in settings_class.body
+        )
+
+        lines = existing_content.splitlines(keepends=True)
+
+        # Ensure we insert before trailing blank lines inside the class body.
+        insert_index = insert_after_line
+        while (
+            insert_index < len(lines)
+            and lines[insert_index].strip() == ""
+            and lines[insert_index - 1].startswith(indent)
+        ):
+            insert_index += 1
+
+        field_template = self.env.get_template("field.jinja2")
+        field_block = field_template.render(
+            indent=indent,
+            service_module=self._service_module,
+            service_env_var=self._service_env_var,
+        )
+
+        updated_content = "".join(
+            lines[:insert_index] + [field_block] + lines[insert_index:]
+        )
+        output_path.write_text(updated_content, encoding="utf-8")
