@@ -66,11 +66,11 @@ class FixtureGenerator(BaseTemplateGenerator):
         output_path = self._service_file_path()
         output_parent = output_path.parent
 
-        self._ensure_init_file(
+        create_and_write_file(
             self.base_path / "__init__.py",
             f"from . import {self._service_module}  # noqa: F401",
         )
-        self._ensure_init_file(
+        create_and_write_file(
             self.base_path.parent / "__init__.py",
             "from .http import *  # noqa: F401",
         )
