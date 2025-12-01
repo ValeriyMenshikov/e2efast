@@ -70,6 +70,14 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
         if not clients:
             return
 
+        create_and_write_file(
+            self.base_path / "__init__.py",
+            f"from . import {self._service_module}_service  # noqa: F401",
+        )
+        create_and_write_file(
+            self.base_path.parent / "__init__.py",
+            "from .http import *  # noqa: F401",
+        )
         rendered = template.render(
             header=self._render_header(
                 service_name=self._service_module,

@@ -1,6 +1,13 @@
 {{ header }}
+"""
+    Need for auto registration fixtures, you can append more fixtures to this list.
 
-pytest_plugins = [
-    # Add your or generated fixtures here from framework.fixtures
-    "framework.fixtures.http.{{ service_name }}_service",
-]
+    Example:
+        pytest_plugins = get_fixtures()
+        pytest_plugins += ["fixture1", "fixture2"]
+"""  # noqa: E501
+
+import framework.fixtures  # noqa: F401
+from e2efast.fixture_registry import get_fixtures
+
+pytest_plugins = get_fixtures()

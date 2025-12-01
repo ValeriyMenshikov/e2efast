@@ -9,6 +9,7 @@ import pytest
 
 from framework.fixtures.http.base import ClientClass
 from framework.settings.base_settings import Settings
+from e2efast.fixture_registry import register_fixture
 
 {% for fixture in fixtures -%}
 from {{ child_client_import }}.{{ service_module }}.{{ fixture.api_module }}_client import {{ fixture.api_client_class }}
@@ -35,3 +36,4 @@ def {{ fixture.fixture_name }}({{ service_fixture_name }}: ClientType) -> {{ fix
 
 
 {% endfor %}
+register_fixture(__name__)

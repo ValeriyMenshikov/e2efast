@@ -66,14 +66,20 @@ class FixtureGenerator(BaseTemplateGenerator):
         output_path = self._service_file_path()
         output_parent = output_path.parent
 
-        self._ensure_init_file(self.base_path / "__init__.py")
+        self._ensure_init_file(
+            self.base_path / "__init__.py",
+            f"from . import {self._service_module}  # noqa: F401",
+        )
+        self._ensure_init_file(
+            self.base_path.parent / "__init__.py",
+            "from .http import *  # noqa: F401",
+        )
         if output_parent != self.base_path:
             self._ensure_init_file(output_parent / "__init__.py")
 
         template = self.env.get_template("fixture.jinja2")
 
         fixtures: list[dict[str, str]] = []
-        all_models: set[str] = set()
 
         for api_name, operations in sorted(
             self._operations_by_api().items(), key=lambda item: (item[0] or "")
@@ -130,10 +136,10 @@ class FixtureGenerator(BaseTemplateGenerator):
         return api_map
 
     @staticmethod
-    def _ensure_init_file(path: Path) -> None:
+    def _ensure_init_file(path: Path, text: str | None = None) -> None:
         if path.exists():
             return
-        create_and_write_file(path, "# coding: utf-8\n")
+        create_and_write_file(path, text or " ")
 
     @staticmethod
     def _default_child_client_import() -> str:
