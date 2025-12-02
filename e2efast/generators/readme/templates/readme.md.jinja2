@@ -15,16 +15,19 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
    poetry run e2efast {{ service_module }} --spec ./openapi.json --with-tests
    ```
 
-2. Open `framework/settings/base_settings.py` and update the base URL or any
-   other settings you require.
+2. Open `framework/settings/base_settings.py` and provide host values for the
+   generated fields. The generator will append new services to this file
+   automatically—you only need to fill in the URLs.
 
-3. Export the environment variables (or ensure they are provided via your
-   settings loader) and start writing tests—the generated clients, fixtures, and
-   tests will use the configuration automatically.
+3. Environment variables are optional: leave them unset if you rely on
+   `Settings()` defaults, or export overrides before running tests:
 
-   On the first run the generator creates `framework/settings/base_settings.py`
-   and, when fixtures are enabled, `tests/conftest.py`. Subsequent updates should
-   be applied manually.
+   ```bash
+   export {{ service_env_var }}="https://api.example.test"
+   ```
+
+   Generated clients, fixtures, and tests will read values from `Settings()` on
+   every run.
 
 4. Need only clients and fixtures (without tests)? Run the same command with
    `--with-fixtures` (the `--spec` option still accepts a path or URL):
@@ -65,36 +68,26 @@ This project was scaffolded from the OpenAPI specification for the `{{ service_n
 
 ## Using the Fixtures
 
-1. Expose the fixtures to pytest by adding the generated module to `pytest_plugins` in your root `conftest.py`:
+1. Fixtures are auto-registered via `tests/conftest.py` by calling
+   `get_fixtures()`. If you add custom fixture modules, extend the returned list
+   or append to `pytest_plugins` in that file.
 
-   ```python
-   pytest_plugins = ["framework.fixtures.http.{{ service_module }}"]
-   ```
-
-2. Export the base URL for the service before running tests:
+2. Provide base URLs in either `framework/settings/base_settings.py` or via
+   environment variables. The settings generator keeps the file in sync with new
+   services, so you typically only update the values:
 
    ```bash
    export {{ service_env_var }}="https://api.example.test"
    ```
-   or
-   ```python
-   # conftest.py
-   import os
-   os.environ["{{ service_env_var }}"] = "https://api.example.test"
-   ```
-
-   The fixtures will reuse this environment variable when creating HTTP clients.
 
 3. If you need to change the HTTP client implementation globally, edit
    `framework/fixtures/http/base.py` and update `ClientClass`. Every generated
    fixture imports that alias and will pick up the override automatically.
 
-4. Initial configuration settings are scaffolded in
-   `framework/settings/base_settings.py`. The file is generated only on the
-   first run—afterwards you should maintain it manually (for example, to point at
-   different hosts or add extra parameters). The expected environment variable
-   names follow the pattern `<package_name_upper>_BASE_URL`; you can confirm the
-   exact name inside any generated fixture (look for the `os.getenv` call).
+4. `framework/settings/base_settings.py` is editable and now auto-augmented on
+   subsequent generations. New services get appended as `str | None` fields, so
+   you only need to supply the URL. Environment variable names follow the pattern
+   `<package_name_upper>_BASE_URL` and are mirrored in the settings aliases.
 
 ## Regeneration Guidelines
 

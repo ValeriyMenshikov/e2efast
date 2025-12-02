@@ -42,16 +42,16 @@ Want to see a complete scaffold created by e2efast? Check out the sample reposit
    poetry run e2efast customers --spec ./crm_v2_service.json --with-tests
    ```
 
-3. Open `framework/settings/base_settings.py` and update the base URL or any
-   other settings you require.
+3. Open `framework/settings/base_settings.py` and provide host values for the
+   generated fields. The settings generator appends new services on subsequent
+   runs, so you normally only fill in the URLs.
 
-4. Export the environment variables (or ensure they are provided via your
-   settings loader) and start writing tests—the generated clients, fixtures, and
-   tests will use the configuration automatically.
+4. Environment variables are optional: leave them unset to rely on
+   `Settings()` defaults, or export overrides before executing tests:
 
-   On the first run the generator creates `framework/settings/base_settings.py`
-   and, when fixtures are enabled, `tests/conftest.py`. Subsequent updates should
-   be applied manually.
+   ```bash
+   export CUSTOMERS_BASE_URL="https://api.example.test"
+   ```
 
 5. Need only clients and fixtures (without tests)? Run the same command with
    `--with-fixtures` (the `--spec` option still accepts a path or URL):
@@ -137,24 +137,16 @@ The `base.py` file is generated only when missing, so manual overrides are prese
 
 ## 🧩 Wiring Fixtures into pytest
 
-Add the generated fixture package to your test suite via `pytest_plugins` so they auto-register during collection:
-
-```python
-# conftest.py
-pytest_plugins = ["framework.fixtures.http.service_name"]
-```
-
-Replace `service_name` with the snake_case module generated in `framework/fixtures/http` (for example the CLI run above produces `framework/fixtures/http/customers.py`, so use `pytest_plugins = ["framework.fixtures.http.customers"]`).
+The generated `tests/conftest.py` uses `get_fixtures()` to auto-register fixture
+modules. If you add your own fixture packages, extend the returned list or append
+entries to `pytest_plugins` inside that file.
 
 ## 🌐 Environment Variables
 
-Each generated fixture module reads a service-specific base URL from `os.getenv("<SERVICE_NAME>_BASE_URL")`. Define this environment variable before running fixtures or the generated tests—for example:
-
-```bash
-export CUSTOMERS_BASE_URL="https://api.example.test"
-```
-
-The variable name is derived from the snake_case service module uppercased with `_BASE_URL` appended (e.g. `customers` → `CUSTOMERS_BASE_URL`). The expected names follow the pattern `<package_name_upper>_BASE_URL`; you can confirm the exact value inside any generated fixture (look for the `os.getenv` call).
+`framework/settings/base_settings.py` is generated once and then updated
+incrementally: new services are appended as optional `str` fields with matching
+`alias` names. Provide host values directly in the file or override via
+environment variables (pattern `<PACKAGE_NAME_UPPER>_BASE_URL`).
 
 ## 🛠️ Development Workflow
 
