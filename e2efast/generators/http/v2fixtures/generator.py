@@ -14,6 +14,7 @@ from restcodegen.generator.utils import (
 )
 
 from e2efast.generators.http.client.generator import ClientGenerator
+from e2efast.generators.utils import ensure_import_line
 from e2efast.utils import get_version, render_header
 
 
@@ -70,11 +71,11 @@ class ServiceFixtureGenerator(BaseTemplateGenerator):
         if not clients:
             return
 
-        create_and_write_file(
+        ensure_import_line(
             self.base_path / "__init__.py",
             f"from . import {self._service_module}_service  # noqa: F401",
         )
-        create_and_write_file(
+        ensure_import_line(
             self.base_path.parent / "__init__.py",
             "from .http import *  # noqa: F401",
         )
