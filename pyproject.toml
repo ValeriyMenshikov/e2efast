@@ -12,7 +12,10 @@ restcodegen = ">=2.0.1"
 pydantic-settings = "^2.12.0"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^9.0.1"
+mypy = ">=1.14.1,<2.0.0"
+pytest = ">=8.3.5,<10.0.0"
+pytest-cov = ">=6.2.1,<8.0.0"
+coverage-lcov = ">=0.2.2,<1.0.0"
 
 [tool.poetry.scripts]
 e2efast = "e2efast.cli.main:main"
