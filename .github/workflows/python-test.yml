@@ -38,7 +38,7 @@ jobs:
 
       - name: Lint with ruff
         run: |
-          poetry run ruff check restcodegen
+          poetry run ruff check e2efast
 
       - name: Type check with mypy
         run: |
@@ -46,7 +46,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          poetry run pytest --cov=restcodegen --cov-report=xml
+          poetry run pytest --cov=e2efast --cov-report=xml
           poetry run coverage lcov
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
