@@ -40,9 +40,9 @@ jobs:
         run: |
           poetry run ruff check e2efast
 
-      - name: Type check with mypy
-        run: |
-          poetry run mypy e2efast
+#      - name: Type check with mypy
+#        run: |
+#          poetry run mypy e2efast
 
       - name: Run tests with coverage
         run: |

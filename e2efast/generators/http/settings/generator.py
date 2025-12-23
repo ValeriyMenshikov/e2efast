@@ -98,7 +98,8 @@ class SettingsGenerator(BaseTemplateGenerator):
                 break
 
         insert_after_line = max(
-            getattr(node, "end_lineno", settings_class.lineno) for node in settings_class.body
+            getattr(node, "end_lineno", settings_class.lineno)
+            for node in settings_class.body
         )
 
         lines = existing_content.splitlines(keepends=True)

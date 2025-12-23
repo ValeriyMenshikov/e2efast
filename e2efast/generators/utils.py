@@ -11,7 +11,7 @@ def ensure_import_line(path: Path, line: str) -> None:
         return
 
     existing_text = path.read_text(encoding="utf-8")
-    existing_lines = [l.strip() for l in existing_text.splitlines()]
+    existing_lines = [_.strip() for _ in existing_text.splitlines()]
     if line.strip() in existing_lines:
         return
 
