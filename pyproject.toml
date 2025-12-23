@@ -10,6 +10,8 @@ packages = [{ include = "e2efast" }]
 python = ">=3.10, <4.0"
 restcodegen = ">=2.0.1"
 pydantic-settings = "^2.12.0"
+
+[tool.poetry.group.dev.dependencies]
 pytest = "^9.0.1"
 
 [tool.poetry.scripts]
